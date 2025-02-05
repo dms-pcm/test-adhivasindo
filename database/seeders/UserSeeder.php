@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $item               = new User();
-        $item->key          = Str::uuid()->toString();
+        $item->skey          = Str::uuid()->toString();
         $item->name         = 'Dimas Purbo Choirul Mustaqim';
         $item->nim          = 02052025;
         $item->ymd          = 01122025;
