@@ -14,18 +14,27 @@ class AuthController extends Controller
 {
     public function me() : JsonResponse
     {
-        try {
-            return response()->json(auth('sanctum')->user());
-        } catch (Exception $e) {
+        $user = auth('sanctum')->user();
+
+        if (!$user) {
             return response()->json([
                 'data' => null,
                 'status' => [
-                    'message' => $e->getMessage(),
-                    'code' => 400
+                    'message' => 'Unauthenticated.',
+                    'code' => 401
                 ]
-            ], 400);
+            ], 401);
         }
+
+        return response()->json([
+            'data' => UserResource::make($user),
+            'status' => [
+                'message' => 'User retrieved successfully.',
+                'code' => 200
+            ]
+        ], 200);
     }
+    
     public function login(Request $request) : JsonResponse
     {
         $request->validate([
