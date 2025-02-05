@@ -16,7 +16,7 @@ class Authenticate extends Middleware
             abort(response()->json([
                 'data' => null,
                 'status' => [
-                    'message' => 'You must log in first',
+                    'message' => 'Unauthenticated, You must log in first',
                     'code' => 401
                 ]
             ], 401));

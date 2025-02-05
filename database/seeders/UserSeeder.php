@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $item->skey          = Str::uuid()->toString();
         $item->name         = 'Dimas Purbo Choirul Mustaqim';
         $item->nim          = "0122334455";
-        $item->ymd          = "01122025";
+        $item->ymd          = "20250205";
         $item->email        = 'dimas@adhivasindo.com';
         $item->password     = bcrypt('dimasdimas');
         $item->save();

@@ -7,7 +7,7 @@ use App\Models\User;
 
 class UserObserver
 {
-    public function created(User $item): void
+    public function creating(User $item): void
     {
         $item->skey = Str::uuid()->toString();
     }

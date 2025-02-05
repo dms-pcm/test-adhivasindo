@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\{AuthController, UserController};
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +18,15 @@ use Illuminate\Support\Facades\Route;
 Route::post('user/login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => [
-    'auth:sanctum'
+    'auth:sanctum',
 ]], function () {
     Route::get('user-me', [AuthController::class, 'me']);
     Route::get('logout', [AuthController::class, 'logout']);
+
+    Route::group(['prefix' => 'manage-users'], function (){
+        Route::post('newUser', [UserController::class, 'newUser']);
+        Route::get('detail/{userKey}', [UserController::class, 'showDetail']);
+        Route::post('update/{userKey}', [UserController::class, 'updateUser']);
+        Route::delete('delete/{userKey}', [UserController::class, 'destroy']);
+    });
 });

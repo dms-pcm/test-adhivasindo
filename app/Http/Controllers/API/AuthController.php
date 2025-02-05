@@ -4,27 +4,18 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     public function me() : JsonResponse
     {
         $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return response()->json([
-                'data' => null,
-                'status' => [
-                    'message' => 'Unauthenticated.',
-                    'code' => 401
-                ]
-            ], 401);
-        }
 
         return response()->json([
             'data' => UserResource::make($user),
@@ -35,64 +26,82 @@ class AuthController extends Controller
         ], 200);
     }
     
-    public function login(Request $request) : JsonResponse
+    public function login(Request $request): JsonResponse
     {
-        $request->validate([
-            'nim' => 'required',
-            'password' => 'required'
-        ]);
-
-        auth()->attempt(['nim' => $request->nim, 'password' => $request->password]);
-
-        $user = auth('sanctum')->user();
-
-        if (!$user) {
+        try {
+            $request->validate([
+                'nim' => 'required',
+                'password' => 'required'
+            ]);
+        } catch (Exception $e) {
             return response()->json([
-                'data' => null,
+                'data' => $e->getMessage(),
                 'status' => [
-                    'message' => 'Nim or Password wrong.',
+                    'message' => 'Something wrong',
                     'code' => 400
                 ]
             ], 400);
         }
 
-        try {
-            $token = $user->createToken(config('app.name'))->plainTextToken;
-
-            $collection = UserResource::make($user);
-
-            return response()->json([
-                'data' => [
-                    'user' => $collection,
-                    'token' => $token
-                ],
-                'status' => [
-                    'message' => 'User Login successfully.',
-                    'code' => 200
-                ]
-            ], 200);
-
-        } catch (Exception $e) {
+        if (!Auth::attempt(['nim' => $request->nim, 'password' => $request->password])) {
             return response()->json([
                 'data' => null,
                 'status' => [
-                    'message' => $e->getMessage(),
+                    'message' => 'NIM or Password is incorrect.',
                     'code' => 400
                 ]
             ], 400);
+        }
+
+        $user = User::whereNim($request->nim)->first();
+
+        try {
+            $token = $user->createToken(config('app.name'))->plainTextToken;
+
+            return response()->json([
+                'data' => [
+                    'user' => new UserResource($user),
+                    'token' => $token
+                ],
+                'status' => [
+                    'message' => 'User logged in successfully.',
+                    'code' => 200
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => $e->getMessage(),
+                'status' => [
+                    'message' => 'Something went wrong while generating the token.',
+                    'code' => 500
+                ]
+            ], 500);
         }
     }
 
     public function logout() : JsonResponse
     {
+        $authUser = auth('sanctum')->user();
+
         try {
             $user = User::find(auth('sanctum')->id());
+
+            if (!$user) {
+                return response()->json([
+                    'data' => null,
+                    'status' => [
+                        'message' => 'User not found',
+                        'code' => 400
+                    ]
+                ], 400);
+            }
+
             $user->tokens()->delete();
         } catch (Exception $e) {
             return response()->json([
-                'data' => 'Error on user on auth',
+                'data' => $e->getMessage(),
                 'status' => [
-                    'message' => $e->getMessage(),
+                    'message' => 'Error on user on auth',
                     'code' => 400
                 ]
             ], 400);

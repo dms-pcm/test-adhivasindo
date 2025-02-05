@@ -14,6 +14,8 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, Userstamps;
 
+    protected $guarded = ['id'];
+
     protected $hidden = [
         'id',
         'password',
