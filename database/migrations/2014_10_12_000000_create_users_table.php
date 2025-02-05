@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->uuid('skey')->unique();
             $table->string('name');
-            $table->string('nim')->nullable();
+            $table->string('nim')->unique();
             $table->string('ymd')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
