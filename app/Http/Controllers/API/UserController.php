@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
+use App\Http\Resources\UserResource;
+use App\Http\Traits\SearchContent;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Arr;
 
 class UserController extends Controller
 {
+    use SearchContent;
+
     public function newUser(Request $request) : JsonResponse
     {
         $authUser = auth('sanctum')->user();
@@ -152,6 +156,129 @@ class UserController extends Controller
             'data' => null,
             'status' => [
                 'message' => 'User deleted successfully.',
+                'code' => 200
+            ]
+        ], 200);
+    }
+
+    public function searchName(Request $request) : JsonResponse
+    {
+        $authUser = auth('sanctum')->user();
+        
+        try {
+            $request->validate([
+                'name' => 'required'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => $e->getMessage(),
+                'status' => [
+                    'message' => 'Something wrong',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        $collection = $this->initSource();
+        $filtered = Arr::where($collection, function ($value, $key) use ($request) {
+            return stripos($value['name'], $request->name) !== false;
+        });
+
+        if (!$filtered) {
+            return response()->json([
+                'status' => [
+                    'message' => 'Name not found.',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        return response()->json([
+            'data' => $filtered,
+            'status' => [
+                'message' => 'Name found.',
+                'code' => 200
+            ]
+        ], 200);
+    }
+
+    public function searchNim(Request $request) : JsonResponse
+    {
+        $authUser = auth('sanctum')->user();
+
+        try {
+            $request->validate([
+                'nim' => 'required'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => $e->getMessage(),
+                'status' => [
+                    'message' => 'Something wrong',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        $collection = $this->initSource();
+        $filtered = Arr::where($collection, function ($value, $key) use ($request) {
+            return $value['nim'] === $request->nim;
+        });
+
+        if (!$filtered) {
+            return response()->json([
+                'status' => [
+                    'message' => 'NIM not found.',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        return response()->json([
+            'data' => $filtered,
+            'status' => [
+                'message' => 'NIM found.',
+                'code' => 200
+            ]
+        ], 200);
+    }
+
+    public function searchYMD(Request $request) : JsonResponse
+    {
+        $authUser = auth('sanctum')->user();
+        
+        try {
+            $request->validate([
+                'ymd' => 'required'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => $e->getMessage(),
+                'status' => [
+                    'message' => 'Something wrong',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        $collection = $this->initSource();
+        $filtered = Arr::where($collection, function ($value, $key) use ($request) {
+            return $value['ymd'] === $request->ymd;
+        });
+
+        if (!$filtered) {
+            return response()->json([
+                'status' => [
+                    'message' => 'YMD not found.',
+                    'code' => 400
+                ]
+            ], 400);
+        }
+
+        return response()->json([
+            'data' => $filtered,
+            'status' => [
+                'message' => 'YMD found.',
                 'code' => 200
             ]
         ], 200);

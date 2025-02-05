@@ -21,6 +21,9 @@ Route::group(['middleware' => [
     'auth:sanctum',
 ]], function () {
     Route::get('user-me', [AuthController::class, 'me']);
+    Route::post('update-profil', [AuthController::class, 'updateProfil']);
+    Route::post('change-password', [AuthController::class, 'changePassword']);
+    Route::delete('delete-account', [AuthController::class, 'deleteAccount']);
     Route::get('logout', [AuthController::class, 'logout']);
 
     Route::group(['prefix' => 'manage-users'], function (){
@@ -28,5 +31,11 @@ Route::group(['middleware' => [
         Route::get('detail/{userKey}', [UserController::class, 'showDetail']);
         Route::post('update/{userKey}', [UserController::class, 'updateUser']);
         Route::delete('delete/{userKey}', [UserController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'search'], function (){
+        Route::post('name', [UserController::class, 'searchName']);
+        Route::post('nim', [UserController::class, 'searchNim']);
+        Route::post('ymd', [UserController::class, 'searchYMD']);
     });
 });
